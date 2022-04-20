@@ -3,26 +3,25 @@ package dev.alimansour.profilecardlayout
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -30,6 +29,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import coil.compose.rememberAsyncImagePainter
+import dev.alimansour.profilecardlayout.ui.theme.CardColor
 import dev.alimansour.profilecardlayout.ui.theme.LightGreen
 import dev.alimansour.profilecardlayout.ui.theme.ProfileCardLayoutTheme
 
@@ -57,14 +57,16 @@ fun UsersApplication(userProfiles: List<UserProfile> = userProfileList) {
                 type = NavType.IntType
             })
         ) {
-            UserProfileDetailsScreen(it.arguments!!.getInt("UserId"))
+            UserProfileDetailsScreen(it.arguments!!.getInt("UserId"), navController)
         }
     }
 }
 
 @Composable
 fun UserListScreen(userProfiles: List<UserProfile>, navController: NavHostController?) {
-    Scaffold(topBar = { AppBar() }) {
+    Scaffold(topBar = {
+        AppBar(title = "Users List", icon = Icons.Default.Home) { }
+    }) {
         Surface(modifier = Modifier.fillMaxSize()) {
             LazyColumn {
                 items(userProfiles) { userProfile ->
@@ -78,12 +80,19 @@ fun UserListScreen(userProfiles: List<UserProfile>, navController: NavHostContro
 }
 
 @Composable
-fun UserProfileDetailsScreen(userId: Int) {
+fun UserProfileDetailsScreen(userId: Int, navController: NavHostController?) {
     val userProfile = userProfileList.first { userProfile -> userProfile.id == userId }
-    Scaffold(topBar = { AppBar() }) {
+    val scrollState = rememberScrollState()
+    Scaffold(topBar = {
+        AppBar(title = "User Profile Details", icon = Icons.Default.ArrowBack) {
+            navController?.navigateUp()
+        }
+    }) {
         Surface(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(state = scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
@@ -95,16 +104,18 @@ fun UserProfileDetailsScreen(userId: Int) {
 }
 
 @Composable
-fun AppBar() {
+fun AppBar(title: String, icon: ImageVector, iconClickAction: () -> Unit) {
     TopAppBar(
         navigationIcon = {
             Icon(
-                imageVector = Icons.Default.Home,
+                imageVector = icon,
                 contentDescription = "Navigation Icon",
-                modifier = Modifier.padding(horizontal = 12.dp)
+                modifier = Modifier
+                    .padding(horizontal = 12.dp)
+                    .clickable(onClick = iconClickAction)
             )
         },
-        title = { Text(text = "Messaging Application Users") }
+        title = { Text(text = title) }
     )
 }
 
@@ -117,7 +128,7 @@ fun ProfileCard(userProfile: UserProfile, clickAction: () -> Unit) {
             .wrapContentHeight(align = Alignment.Top)
             .clickable(onClick = clickAction),
         elevation = 8.dp,
-        backgroundColor = Color.White
+        backgroundColor = CardColor
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -171,7 +182,7 @@ fun ProfileContent(userName: String, onlineStatus: Boolean, alignment: Alignment
 @Composable
 fun UserProfileDetailsPreview() {
     ProfileCardLayoutTheme {
-        UserProfileDetailsScreen(userId = 1)
+        UserProfileDetailsScreen(userId = 1, null)
     }
 }
 

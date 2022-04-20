@@ -1,5 +1,6 @@
 package dev.alimansour.profilecardlayout.ui.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -14,3 +15,7 @@ val LightGreen200 = Color(0x9932CD32)
 val LightGreen: Color
     @Composable
     get() = LightGreen200
+
+val CardColor: Color
+    @Composable
+    get() = if (isSystemInDarkTheme()) Color.Black else Color.White
